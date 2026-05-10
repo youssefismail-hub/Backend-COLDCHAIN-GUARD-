@@ -3,55 +3,59 @@ const User = require("../models/userModel");
 exports.createUser = async (req, res) => {
   try {
     const newUser = await User.create(req.body);
-    res.status(201).json({
+
+    return res.status(201).json({
       message: "User Created !!!",
-      test: "Hello !",
-      data: newUser,
+      data: {
+        id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+      },
     });
   } catch (error) {
-    res.status(400).json({
+    return res.status(400).json({
       message: "Fail !",
-      error: error,
+      error: error.message,
     });
   }
 };
 
 exports.getUsers = async (req, res) => {
   try {
-    const users = await User.find();
-    res.status(200).json({
+    const users = await User.find().select("-password -__v");
+
+    return res.status(200).json({
       message: "Users Fetched !!!",
-      data: {
-        nbr: users.length,
-        users,
-      },
+      results: users.length,
+      data: users,
     });
   } catch (error) {
-    res.status(400).json({
+    return res.status(400).json({
       message: "Fail !",
-      error: error,
+      error: error.message,
     });
   }
 };
 
 exports.getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.id).select("-password -__v");
+
     if (!user) {
-      res.status(404).json({
+      return res.status(404).json({
         message: "User Not Found !!!",
       });
     }
-    res.status(200).json({
+
+    return res.status(200).json({
       message: "User Fetched !!!",
-      data: {
-        user,
-      },
+      data: user,
     });
   } catch (error) {
-    res.status(400).json({
+    return res.status(400).json({
       message: "Fail !",
-      error: error,
+      error: error.message,
     });
   }
 };
@@ -61,36 +65,43 @@ exports.updateUserById = async (req, res) => {
     const user = await User.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
-    });
+    }).select("-password -__v");
+
     if (!user) {
-      res.status(404).json({
+      return res.status(404).json({
         message: "User Not Found !!!",
       });
     }
-    res.status(200).json({
+
+    return res.status(200).json({
       message: "User Updated !!!",
-      data: {
-        user,
-      },
+      data: user,
     });
   } catch (error) {
-    res.status(400).json({
+    return res.status(400).json({
       message: "Fail !",
-      error: error,
+      error: error.message,
     });
   }
 };
 
 exports.deleteUserById = async (req, res) => {
   try {
-    await User.findByIdAndDelete(req.params.id);
-    res.status(200).json({
-      message: "User Delete !!!",
+    const user = await User.findByIdAndDelete(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User Not Found !!!",
+      });
+    }
+
+    return res.status(200).json({
+      message: "User Deleted Successfully !!!",
     });
   } catch (error) {
-    res.status(400).json({
+    return res.status(400).json({
       message: "Fail !",
-      error: error,
+      error: error.message,
     });
   }
 };
