@@ -38,6 +38,11 @@ const userSchema = new mongoose.Schema({
     enum: ["admin", "user", "test1", "test2"],
     default: "user",
   },
+  company: {
+  type: mongoose.Schema.ObjectId,
+  ref: "Company",
+  required: [true, "User must belong to a company !!!"],
+  },
   created_at: {
     type: Date,
     default: Date.now(),
