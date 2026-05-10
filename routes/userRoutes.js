@@ -6,18 +6,25 @@ const {
   updateUserById,
   deleteUserById,
 } = require("../controllers/userController");
+
 const { protectorMW } = require("../middlewares/authGuard");
 
 const router = require("express").Router();
 
-router.post("/signUp", signUp);
-router.post("/signIn", signIn);
+// Auth routes
+router.post("/api/signUp", signUp);
+router.post("/api/signIn", signIn);
 
-router.route("/users").post(createUser).get(getUsers);
+// Protected routes
 router
-  .route("/users/:id")
-  .get(getUserById)
-  .patch(updateUserById)
-  .delete(deleteUserById);
+  .route("/api/users")
+  .post(protectorMW, createUser)
+  .get(protectorMW, getUsers);
+
+router
+  .route("/api/users/:id")
+  .get(protectorMW, getUserById)
+  .patch(protectorMW, updateUserById)
+  .delete(protectorMW, deleteUserById);
 
 module.exports = router;
