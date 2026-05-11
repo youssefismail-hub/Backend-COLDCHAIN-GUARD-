@@ -6,6 +6,9 @@ const mqttRoutes = require("./routes/mqttRoutes");
 const truckRoutes = require("./routes/truckRoutes");
 const telemetryRoutes = require("./routes/telemetryRoutes");
 const companyRoutes = require("./routes/companyRoutes");
+const alertRoutes = require("./routes/alertRoutes");
+
+
 dotenv.config({ path: "./.env" });
 
 
@@ -25,6 +28,7 @@ app.use(userRoutes);
 app.use(mqttRoutes);
 app.use(truckRoutes);
 app.use(telemetryRoutes);
+app.use(alertRoutes);
 app.use(companyRoutes);
 const port = 1234;
 

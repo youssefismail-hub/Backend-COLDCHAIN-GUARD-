@@ -1,11 +1,11 @@
 const Telemetry = require("../models/telemetryModel");
 const Truck = require("../models/truckModel");
+const Alert = require("../models/alertModel");
 
 exports.createTelemetry = async (req, res) => {
   try {
-    const { truck, temperature } = req.body;
+    const { truck, temperature, door_open } = req.body;
 
-    // vérifier si le truck existe
     const existingTruck = await Truck.findById(truck);
 
     if (!existingTruck) {
@@ -16,33 +16,50 @@ exports.createTelemetry = async (req, res) => {
 
     const newTelemetry = await Telemetry.create(req.body);
 
-    // ✅ mettre à jour lastSeen automatiquement
+    //  Mise à jour lastSeen
     existingTruck.lastSeen = Date.now();
-    existingTruck.status = "OK";
+
+    //  Vérification température haute
+    if (temperature > existingTruck.max_temperature) {
+      await Alert.create({
+        truck,
+        type: "TEMP_HIGH",
+        severity: "CRITICAL",
+        message: "Temperature exceeds maximum limit !!!",
+      });
+
+      existingTruck.status = "CRITICAL";
+    }
+
+    //  Vérification température basse
+    if (temperature < existingTruck.min_temperature) {
+      await Alert.create({
+        truck,
+        type: "TEMP_LOW",
+        severity: "CRITICAL",
+        message: "Temperature below minimum limit !!!",
+      });
+
+      existingTruck.status = "CRITICAL";
+    }
+
+    //  Vérification porte ouverte
+    if (door_open === true) {
+      await Alert.create({
+        truck,
+        type: "DOOR_OPEN",
+        severity: "WARNING",
+        message: "Truck door is open !!!",
+      });
+
+      existingTruck.status = "WARNING";
+    }
+
     await existingTruck.save();
 
     return res.status(201).json({
       message: "Telemetry Created Successfully !!!",
       data: newTelemetry,
-    });
-  } catch (error) {
-    return res.status(400).json({
-      message: "Fail !",
-      error: error.message,
-    });
-  }
-};
-
-exports.getTelemetryByTruck = async (req, res) => {
-  try {
-    const telemetry = await Telemetry.find({
-      truck: req.params.truckId,
-    }).sort({ timestamp: -1 });
-
-    return res.status(200).json({
-      message: "Telemetry Fetched Successfully !!!",
-      results: telemetry.length,
-      data: telemetry,
     });
   } catch (error) {
     return res.status(400).json({
