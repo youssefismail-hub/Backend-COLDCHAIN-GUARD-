@@ -41,7 +41,7 @@ exports.protectorMW = async (req, res, next) => {
       });
     }
 
-    // ✅ IMPORTANT
+    
     req.user = user;
 
     next();
