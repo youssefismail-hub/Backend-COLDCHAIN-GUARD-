@@ -16,6 +16,7 @@ dotenv.config({ path: "./.env" });
 mongoose
   .connect(process.env.DATABASE)
   .then(() => {
+    require("./mqtt/mqttSubscriber");
     console.log("Connection to the DB secured !!!");
   })
   .catch((e) => {
