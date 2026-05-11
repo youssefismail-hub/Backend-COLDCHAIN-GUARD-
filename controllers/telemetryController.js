@@ -6,7 +6,7 @@ exports.createTelemetry = async (req, res) => {
   try {
     const { truck, temperature, door_open } = req.body;
 
-    const existingTruck = await Truck.findById(truck);
+    const existingTruck = await Truck.findById({truck: {$in: companyTrucksIds}});
 
     if (!existingTruck) {
       return res.status(404).json({

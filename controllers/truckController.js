@@ -18,7 +18,7 @@ exports.createTruck = async (req, res) => {
 
 exports.getTrucks = async (req, res) => {
   try {
-    const trucks = await Truck.find().populate("company", "name");
+    const trucks = await Truck.find({company: req.user.company}).populate("company", "name");
 
     return res.status(200).json({
       message: "Trucks Fetched Successfully !!!",

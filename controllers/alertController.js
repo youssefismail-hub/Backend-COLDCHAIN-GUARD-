@@ -2,7 +2,7 @@ const Alert = require("../models/alertModel");
 
 exports.getAlerts = async (req, res) => {
   try {
-    const alerts = await Alert.find()
+    const alerts = await Alert.find({truck: { $in: companyTrucksIds }})
       .populate("truck", "name plate_number")
       .sort({ created_at: -1 });
 
