@@ -68,3 +68,22 @@ exports.createTelemetry = async (req, res) => {
     });
   }
 };
+
+exports.getTelemetryByTruck = async (req, res) => {
+  try {
+    const telemetry = await Telemetry.find({
+      truck: req.params.truckId,
+    }).sort({ timestamp: -1 });
+
+    return res.status(200).json({
+      message: "Telemetry Fetched Successfully !!!",
+      results: telemetry.length,
+      data: telemetry,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      message: "Fail !",
+      error: error.message,
+    });
+  }
+};

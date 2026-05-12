@@ -10,7 +10,7 @@ exports.createTruck = async (req, res) => {
     });
   } catch (error) {
     return res.status(400).json({
-      message: "Fail !",
+      message: "Fail de ajout le trucks !",
       error: error.message,
     });
   }
