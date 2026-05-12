@@ -9,9 +9,11 @@ exports.createTruck = async (req, res) => {
       data: newTruck,
     });
   } catch (error) {
+    
     return res.status(400).json({
       message: "Fail de ajout le trucks !",
       error: error.message,
+     
     });
   }
 };
@@ -27,7 +29,7 @@ exports.getTrucks = async (req, res) => {
     });
   } catch (error) {
     return res.status(400).json({
-      message: "Fail !",
+      message: "Fail tout get truks  !",
       error: error.message,
     });
   }
@@ -52,7 +54,7 @@ exports.getTruckById = async (req, res) => {
     });
   } catch (error) {
     return res.status(400).json({
-      message: "Fail !",
+      message: "Fail in get by id  !",
       error: error.message,
     });
   }
@@ -77,7 +79,7 @@ exports.updateTruck = async (req, res) => {
     });
   } catch (error) {
     return res.status(400).json({
-      message: "Fail !",
+      message: "Fail in update truck !",
       error: error.message,
     });
   }
@@ -98,7 +100,7 @@ exports.deleteTruck = async (req, res) => {
     });
   } catch (error) {
     return res.status(400).json({
-      message: "Fail !",
+      message: "Fail in delete truck !",
       error: error.message,
     });
   }
