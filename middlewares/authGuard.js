@@ -42,7 +42,7 @@ exports.protectorMW = async (req, res, next) => {
     }
 
     
-    req.user.company = user;
+    req.user = user;
 
     next();
   } catch (error) {

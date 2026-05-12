@@ -1,6 +1,10 @@
 const mqtt = require("mqtt");
 
-const client = mqtt.connect(process.env.MQTT_BROKER);
+const client = mqtt.connect(process.env.MQTT_BROKER, {
+  username: process.env.MQTT_USERNAME,
+  password: process.env.MQTT_PASSWORD,
+  rejectUnauthorized: true,
+});
 
 client.on("connect", () => {
   console.log(" Connected to MQTT Broker");

@@ -2,8 +2,8 @@ const Truck = require("../models/truckModel");
 
 exports.createTruck = async (req, res) => {
   try {
-    const newTruck = await Truck.create({ ...req.body 
-      , company: req.user.company
+    const newTruck = await Truck.create({ ...req.body ,
+      company: req.user.company,
     });
 
     return res.status(201).json({
@@ -11,7 +11,7 @@ exports.createTruck = async (req, res) => {
       data: newTruck,
     });
   } catch (error) {
-    
+    console.log("REQ USER:", req.user);
     return res.status(400).json({
       message: "Fail de ajout le trucks !",
       error: error.message,
@@ -39,11 +39,12 @@ exports.getTrucks = async (req, res) => {
 
 exports.getTruckById = async (req, res) => {
   try {
-    const truck = await Truck.findById(req.params.id).populate(
+    const truck = await Truck.findById({_id: req.params.id
+    }).populate(
       "company",
       "name"
     );
-
+    
     if (!truck) {
       return res.status(404).json({
         message: "Truck Not Found !!!",
