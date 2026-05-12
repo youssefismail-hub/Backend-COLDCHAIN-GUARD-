@@ -2,7 +2,9 @@ const Truck = require("../models/truckModel");
 
 exports.createTruck = async (req, res) => {
   try {
-    const newTruck = await Truck.create(req.body);
+    const newTruck = await Truck.create({ ...req.body 
+      , company: req.user.company
+    });
 
     return res.status(201).json({
       message: "Truck Created Successfully !!!",
