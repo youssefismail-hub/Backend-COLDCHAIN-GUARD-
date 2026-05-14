@@ -71,13 +71,19 @@ exports.createTelemetry = async (req, res) => {
 
 exports.getTelemetryByTruck = async (req, res) => {
   try {
+    const page = req.query.page * 1 || 1;
+    const limit = req.query.limit * 1 || 10;
+    const skip = (page - 1) * limit;
+
     const telemetry = await Telemetry.find({
       truck: req.params.truckId,
-    }).sort({ timestamp: -1 });
+    })
+      .sort({ timestamp: -1 })
+      .skip(skip)
+      .limit(limit);
 
     return res.status(200).json({
       message: "Telemetry Fetched Successfully !!!",
-      results: telemetry.length,
       data: telemetry,
     });
   } catch (error) {
