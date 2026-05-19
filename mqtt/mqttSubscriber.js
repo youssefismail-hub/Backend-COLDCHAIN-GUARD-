@@ -4,7 +4,7 @@ const topics = require("./mqttTopics");
 const Telemetry = require("../models/telemetryModel");
 const Truck = require("../models/truckModel");
 const Alert = require("../models/alertModel");
-
+const socket = require("../socket");
 client.subscribe(topics.TELEMETRY);
 
 client.on("message", async (topic, message) => {
@@ -63,6 +63,18 @@ client.on("message", async (topic, message) => {
     await truck.save();
 
     console.log(" Telemetry received via MQTT");
+       // TEMPS RÉEL (Socket.io)
+    const io = socket.getIO();
+
+    const companyId = truck.company.toString();
+
+    io.to(companyId).emit("telemetry_update", {
+      truckId: truck._id,
+      temperature,
+      status: truck.status,
+      door_open,
+      timestamp: Telemetry.timestamp,
+    });
   } catch (error) {
     console.log("MQTT Processing Error:", error.message);
   }
