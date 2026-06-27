@@ -4,13 +4,13 @@ const {
   getCompanyById,
 } = require("../controllers/companyController");
 
-const { protectorMW } = require("../middlewares/authGuard");
+const { protectorMW, restrictTo } = require("../middlewares/authGuard");
 
 const router = require("express").Router();
 
 router
   .route("/api/companies")
-  .post(protectorMW, createCompany)
+  .post(protectorMW, restrictTo("admin"), createCompany)
   .get(protectorMW, getCompanies);
 
 router

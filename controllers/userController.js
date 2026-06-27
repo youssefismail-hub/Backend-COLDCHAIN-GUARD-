@@ -1,8 +1,10 @@
 const User = require("../models/userModel");
+const { pickUserFields } = require("../utils/sanitizeUserInput");
 
 exports.createUser = async (req, res) => {
   try {
-    const newUser = await User.create(req.body);
+    const userData = pickUserFields(req.body, { allowRole: true, isAdmin: true });
+    const newUser = await User.create(userData);
 
     return res.status(201).json({
       message: "User Created !!!",
@@ -14,9 +16,9 @@ exports.createUser = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error("createUser error:", error.message);
     return res.status(400).json({
-      message: "Fail !",
-      error: error.message,
+      message: "Unable to create user.",
     });
   }
 };
@@ -31,9 +33,9 @@ exports.getUsers = async (req, res) => {
       data: users,
     });
   } catch (error) {
+    console.error("getUsers error:", error.message);
     return res.status(400).json({
-      message: "Fail !",
-      error: error.message,
+      message: "Unable to fetch users.",
     });
   }
 };
@@ -53,18 +55,20 @@ exports.getUserById = async (req, res) => {
       data: user,
     });
   } catch (error) {
+    console.error("getUserById error:", error.message);
     return res.status(400).json({
-      message: "Fail !",
-      error: error.message,
+      message: "Unable to fetch user.",
     });
   }
 };
 
 exports.updateUserById = async (req, res) => {
   try {
+    const updates = pickUserFields(req.body, { allowRole: true, isAdmin: true });
+
     const user = await User.findOneAndUpdate(
       { _id: req.params.id, company: req.user.company },
-      req.body,
+      updates,
       {
         new: true,
         runValidators: true,
@@ -82,9 +86,9 @@ exports.updateUserById = async (req, res) => {
       data: user,
     });
   } catch (error) {
+    console.error("updateUserById error:", error.message);
     return res.status(400).json({
-      message: "Fail !",
-      error: error.message,
+      message: "Unable to update user.",
     });
   }
 };
@@ -103,9 +107,9 @@ exports.deleteUserById = async (req, res) => {
       message: "User Deleted Successfully !!!",
     });
   } catch (error) {
+    console.error("deleteUserById error:", error.message);
     return res.status(400).json({
-      message: "Fail !",
-      error: error.message,
+      message: "Unable to delete user.",
     });
   }
 };

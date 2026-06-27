@@ -2,7 +2,12 @@ const Truck = require("../models/truckModel");
 
 exports.createTruck = async (req, res) => {
   try {
-    const newTruck = await Truck.create({ ...req.body ,
+    const { name, plate_number, min_temperature, max_temperature } = req.body;
+    const newTruck = await Truck.create({
+      name,
+      plate_number,
+      min_temperature,
+      max_temperature,
       company: req.user.company,
     });
 
@@ -12,9 +17,7 @@ exports.createTruck = async (req, res) => {
     });
   } catch (error) {
     return res.status(400).json({
-      message: "Fail de ajout le trucks !",
-      error: error.message,
-     
+      message: "Unable to create truck.",
     });
   }
 };
@@ -30,8 +33,7 @@ exports.getTrucks = async (req, res) => {
     });
   } catch (error) {
     return res.status(400).json({
-      message: "Fail tout get truks  !",
-      error: error.message,
+      message: "Unable to fetch trucks.",
     });
   }
 };
@@ -55,8 +57,7 @@ exports.getTruckById = async (req, res) => {
     });
   } catch (error) {
     return res.status(400).json({
-      message: "Fail in get by id !",
-      error: error.message,
+      message: "Unable to fetch truck.",
     });
   }
 };
@@ -84,8 +85,7 @@ exports.updateTruck = async (req, res) => {
     });
   } catch (error) {
     return res.status(400).json({
-      message: "Fail in update truck !",
-      error: error.message,
+      message: "Unable to update truck.",
     });
   }
 };
@@ -108,8 +108,7 @@ exports.deleteTruck = async (req, res) => {
     });
   } catch (error) {
     return res.status(400).json({
-      message: "Fail in delete truck !",
-      error: error.message,
+      message: "Unable to delete truck.",
     });
   }
 };

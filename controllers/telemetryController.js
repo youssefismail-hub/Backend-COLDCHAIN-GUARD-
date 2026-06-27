@@ -1,27 +1,37 @@
 const Telemetry = require("../models/telemetryModel");
 const Truck = require("../models/truckModel");
-const Alert = require("../models/alertModel");
 
 exports.createTelemetry = async (req, res) => {
   try {
-    const { truck, temperature, door_open } = req.body;
+    const { truck, temperature, door_open, latitude, longitude } = req.body;
 
-    const existingTruck = await Truck.findById(truck);
-
-    if (!existingTruck) {
-      return res.status(404).json({
-        message: "Truck Not Found !!!",
+    if (!truck) {
+      return res.status(400).json({
+        message: "Truck id is required.",
       });
     }
 
-    const newTelemetry = await Telemetry.create(req.body);
+    const existingTruck = await Truck.findOne({
+      _id: truck,
+      company: req.user.company,
+    });
 
-    //  Mise à jour lastSeen
+    if (!existingTruck) {
+      return res.status(404).json({
+        message: "Truck Not Found or access denied !!!",
+      });
+    }
+
+    const newTelemetry = await Telemetry.create({
+      truck,
+      temperature,
+      door_open,
+      latitude,
+      longitude,
+    });
+
     existingTruck.lastSeen = Date.now();
-
-    //  Vérification des alertes télémétriques
     await existingTruck.processTelemetryAlerts(temperature, door_open);
-
     await existingTruck.save();
 
     return res.status(201).json({
@@ -29,9 +39,9 @@ exports.createTelemetry = async (req, res) => {
       data: newTelemetry,
     });
   } catch (error) {
+    console.error("createTelemetry error:", error.message);
     return res.status(400).json({
-      message: "Fail !",
-      error: error.message,
+      message: "Unable to create telemetry.",
     });
   }
 };
@@ -42,7 +52,6 @@ exports.getTelemetryByTruck = async (req, res) => {
     const limit = req.query.limit * 1 || 10;
     const skip = (page - 1) * limit;
 
-    // Verify truck belongs to user's company
     const truck = await Truck.findOne({ _id: req.params.truckId, company: req.user.company });
     if (!truck) {
       return res.status(404).json({
@@ -62,9 +71,9 @@ exports.getTelemetryByTruck = async (req, res) => {
       data: telemetry,
     });
   } catch (error) {
+    console.error("getTelemetryByTruck error:", error.message);
     return res.status(400).json({
-      message: "Fail !",
-      error: error.message,
+      message: "Unable to fetch telemetry.",
     });
   }
 };

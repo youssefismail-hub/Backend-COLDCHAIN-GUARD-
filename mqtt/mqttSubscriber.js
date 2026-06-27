@@ -11,13 +11,19 @@ client.on("message", async (topic, message) => {
   try {
     const data = JSON.parse(message.toString());
 
-    const { truckId, temperature, door_open, latitude, longitude } = data;
+    const truckId = data.truckId;
+    const temperature = data.temperature;
+    const door_open = data.door_open === true;
+    const latitude = data.latitude;
+    const longitude = data.longitude;
+
+    if (!truckId || temperature === undefined) return;
 
     const truck = await Truck.findById(truckId);
 
     if (!truck) return;
 
-    //  Save telemetry
+    //  Save telemetry (whitelisted fields only)
     await Telemetry.create({
       truck: truckId,
       temperature,
@@ -34,7 +40,7 @@ client.on("message", async (topic, message) => {
 
     await truck.save();
 
-    console.log(" Telemetry received via MQTT");
+    console.log("Telemetry received via MQTT");
        // TEMPS RÉEL (Socket.io)
     const io = socket.getIO();
 

@@ -6,19 +6,26 @@ exports.getAlerts = async (req, res) => {
     const companyTrucks = await Truck.find({ company: req.user.company });
     const companyTrucksIds = companyTrucks.map(truck => truck._id);
 
+    const page = req.query.page * 1 || 1;
+    const limit = req.query.limit * 1 || 50;
+    const skip = (page - 1) * limit;
+
     const alerts = await Alert.find({ truck: { $in: companyTrucksIds } })
       .populate("truck", "name plate_number")
-      .sort({ created_at: -1 });
+      .sort({ created_at: -1 })
+      .skip(skip)
+      .limit(limit);
 
     return res.status(200).json({
       message: "Alerts Fetched Successfully !!!",
       results: alerts.length,
+      page,
+      limit,
       data: alerts,
     });
   } catch (error) {
     return res.status(400).json({
-      message: "Fail !",
-      error: error.message,
+      message: "Unable to fetch alerts.",
     });
   }
 };
@@ -42,8 +49,7 @@ exports.resolveAlert = async (req, res) => {
     });
   } catch (error) {
     return res.status(400).json({
-      message: "Fail !",
-      error: error.message,
+      message: "Unable to resolve alert.",
     });
   }
 };

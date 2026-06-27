@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const rateLimit = require("express-rate-limit");
+const helmet = require("helmet");
 const userRoutes = require("./routes/userRoutes");
 const truckRoutes = require("./routes/truckRoutes");
 const telemetryRoutes = require("./routes/telemetryRoutes");
@@ -24,12 +25,22 @@ mongoose
   });
 
 const app = express();
+app.use(helmet());
 app.use(express.json());
 
-// Enable CORS — restrict to explicit origin in production
-const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || "*";
+const { getAllowedOrigins } = require("./socket");
+const allowedOrigins = getAllowedOrigins();
+
 app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", ALLOWED_ORIGIN);
+  const origin = req.headers.origin;
+
+  if (allowedOrigins === "*") {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+  } else if (origin && allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Vary", "Origin");
+  }
+
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   if (req.method === "OPTIONS") {
@@ -78,6 +89,13 @@ app.use(truckRoutes);
 app.use(telemetryRoutes);
 app.use(alertRoutes);
 app.use(companyRoutes);
+
+// Global error handler — catches unhandled errors from all routes
+app.use((err, req, res, next) => {
+  console.error("Unhandled error:", err.message, err.stack);
+  res.status(500).json({ message: "Internal server error." });
+});
+
 const port = 1234;
 //  Create HTTP Server
 const server = http.createServer(app);

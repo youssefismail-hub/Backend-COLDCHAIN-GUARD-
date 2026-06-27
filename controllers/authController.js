@@ -1,19 +1,32 @@
 const User = require("../models/userModel");
+const Company = require("../models/companyModel");
 const jwt = require("jsonwebtoken");
+const { pickUserFields } = require("../utils/sanitizeUserInput");
 
 const createToken = (id, email) => {
   return jwt.sign({ id, email }, process.env.JWT_SECRET, {
-    expiresIn: "30d",
+    expiresIn: "7d",
   });
 };
 
 exports.signUp = async (req, res) => {
   try {
-    const ALLOWED_PUBLIC_ROLES = ["user", "driver"];
-    const newUser = await User.create({
-      ...req.body,
-      role: ALLOWED_PUBLIC_ROLES.includes(req.body.role) ? req.body.role : "user",
-    });
+    const userData = pickUserFields(req.body, { allowRole: true, isAdmin: false });
+
+    if (!userData.company) {
+      return res.status(400).json({
+        message: "A valid company is required.",
+      });
+    }
+
+    const company = await Company.findById(userData.company);
+    if (!company) {
+      return res.status(400).json({
+        message: "Company not found.",
+      });
+    }
+
+    const newUser = await User.create(userData);
 
     return res.status(201).json({
       message: "User Created !!!",
@@ -25,9 +38,9 @@ exports.signUp = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error("signUp error:", error.message);
     return res.status(400).json({
-      message: "Fail !",
-      error: error.message,
+      message: "Unable to create user. Check your input and try again.",
     });
   }
 };
@@ -57,9 +70,9 @@ exports.signIn = async (req, res) => {
       token,
     });
   } catch (error) {
+    console.error("signIn error:", error.message);
     return res.status(400).json({
-      message: "Fail !",
-      error: error.message,
+      message: "Unable to sign in. Please try again.",
     });
   }
 };

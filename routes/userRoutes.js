@@ -24,7 +24,7 @@ router
 router
   .route("/api/users/:id")
   .get(protectorMW, getUserById)
-  .patch(protectorMW, updateUserById)
-  .delete(protectorMW, deleteUserById);
+  .patch(protectorMW, restrictTo("admin"), updateUserById)
+  .delete(protectorMW, restrictTo("admin"), deleteUserById);
 
 module.exports = router;

@@ -9,7 +9,6 @@ const companySchema = new mongoose.Schema({
 
   address: {
     type: String,
-    required: [true, "Company address is required !!!"],
   },
 
   created_at: {
