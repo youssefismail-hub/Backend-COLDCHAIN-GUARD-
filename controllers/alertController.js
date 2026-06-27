@@ -1,8 +1,12 @@
 const Alert = require("../models/alertModel");
+const Truck = require("../models/truckModel");
 
 exports.getAlerts = async (req, res) => {
   try {
-    const alerts = await Alert.find({truck: { $in: companyTrucksIds }})
+    const companyTrucks = await Truck.find({ company: req.user.company });
+    const companyTrucksIds = companyTrucks.map(truck => truck._id);
+
+    const alerts = await Alert.find({ truck: { $in: companyTrucksIds } })
       .populate("truck", "name plate_number")
       .sort({ created_at: -1 });
 
@@ -21,17 +25,16 @@ exports.getAlerts = async (req, res) => {
 
 exports.resolveAlert = async (req, res) => {
   try {
-    const alert = await Alert.findByIdAndUpdate(
-      req.params.id,
-      { resolved: true },
-      { new: true }
-    );
+    const alert = await Alert.findById(req.params.id).populate("truck");
 
-    if (!alert) {
+    if (!alert || alert.truck.company.toString() !== req.user.company.toString()) {
       return res.status(404).json({
-        message: "Alert Not Found !!!",
+        message: "Alert Not Found or access denied !!!",
       });
     }
+
+    alert.resolved = true;
+    await alert.save();
 
     return res.status(200).json({
       message: "Alert Resolved Successfully !!!",

@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ["admin", "user", "test1", "test2"],
+    enum: ["admin", "user", "driver"],
     default: "user",
   },
   company: {
@@ -58,7 +58,7 @@ userSchema.pre("save", async function (next) {
     this.password = await bcryptjs.hash(this.password, 12);
     this.confirm_password = undefined;
   }
-  return next;
+  return next();
 });
 
 userSchema.methods.checkPass = async function (pass, hashedPass) {

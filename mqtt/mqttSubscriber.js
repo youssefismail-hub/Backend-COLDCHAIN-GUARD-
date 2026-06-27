@@ -30,35 +30,7 @@ client.on("message", async (topic, message) => {
     truck.lastSeen = Date.now();
 
     //  Alert Logic
-    if (temperature > truck.max_temperature) {
-      await Alert.create({
-        truck: truckId,
-        type: "TEMP_HIGH",
-        severity: "CRITICAL",
-        message: "Temperature exceeds maximum limit !!!",
-      });
-      truck.status = "CRITICAL";
-    }
-
-    if (temperature < truck.min_temperature) {
-      await Alert.create({
-        truck: truckId,
-        type: "TEMP_LOW",
-        severity: "CRITICAL",
-        message: "Temperature below minimum limit !!!",
-      });
-      truck.status = "CRITICAL";
-    }
-
-    if (door_open === true) {
-      await Alert.create({
-        truck: truckId,
-        type: "DOOR_OPEN",
-        severity: "WARNING",
-        message: "Truck door is open !!!",
-      });
-      truck.status = "WARNING";
-    }
+    await truck.processTelemetryAlerts(temperature, door_open);
 
     await truck.save();
 
@@ -73,7 +45,7 @@ client.on("message", async (topic, message) => {
       temperature,
       status: truck.status,
       door_open,
-      timestamp: Telemetry.timestamp,
+      timestamp: new Date(),
     });
   } catch (error) {
     console.log("MQTT Processing Error:", error.message);

@@ -11,7 +11,6 @@ exports.createTruck = async (req, res) => {
       data: newTruck,
     });
   } catch (error) {
-    console.log("REQ USER:", req.user);
     return res.status(400).json({
       message: "Fail de ajout le trucks !",
       error: error.message,
@@ -39,12 +38,11 @@ exports.getTrucks = async (req, res) => {
 
 exports.getTruckById = async (req, res) => {
   try {
-    const truck = await Truck.findById({_id: req.params.id
-    }).populate(
-      "company",
-      "name"
-    );
-    
+    const truck = await Truck.findOne({
+      _id: req.params.id,
+      company: req.user.company,
+    }).populate("company", "name");
+
     if (!truck) {
       return res.status(404).json({
         message: "Truck Not Found !!!",
@@ -57,7 +55,7 @@ exports.getTruckById = async (req, res) => {
     });
   } catch (error) {
     return res.status(400).json({
-      message: "Fail in get by id  !",
+      message: "Fail in get by id !",
       error: error.message,
     });
   }
@@ -65,10 +63,14 @@ exports.getTruckById = async (req, res) => {
 
 exports.updateTruck = async (req, res) => {
   try {
-    const truck = await Truck.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    // Prevent callers from overriding the company field
+    delete req.body.company;
+
+    const truck = await Truck.findOneAndUpdate(
+      { _id: req.params.id, company: req.user.company },
+      req.body,
+      { new: true, runValidators: true }
+    );
 
     if (!truck) {
       return res.status(404).json({
@@ -90,7 +92,10 @@ exports.updateTruck = async (req, res) => {
 
 exports.deleteTruck = async (req, res) => {
   try {
-    const truck = await Truck.findByIdAndDelete(req.params.id);
+    const truck = await Truck.findOneAndDelete({
+      _id: req.params.id,
+      company: req.user.company,
+    });
 
     if (!truck) {
       return res.status(404).json({

@@ -39,6 +39,8 @@ const alertSchema = new mongoose.Schema({
   },
 });
 
+alertSchema.index({ truck: 1, created_at: -1 });
+
 const Alert = mongoose.model("Alert", alertSchema);
 
 module.exports = Alert;

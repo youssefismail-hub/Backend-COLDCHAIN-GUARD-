@@ -7,7 +7,7 @@ const { protectorMW } = require("../middlewares/authGuard");
 
 const router = require("express").Router();
 
-router.post("/api/telemetry", createTelemetry); 
+router.post("/api/telemetry", protectorMW, createTelemetry); 
 
 
 router.get(

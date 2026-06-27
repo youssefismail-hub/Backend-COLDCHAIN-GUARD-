@@ -9,9 +9,10 @@ const createToken = (id, email) => {
 
 exports.signUp = async (req, res) => {
   try {
+    const ALLOWED_PUBLIC_ROLES = ["user", "driver"];
     const newUser = await User.create({
       ...req.body,
-      role: req.body.role === "admin" ? "user" : req.body.role,
+      role: ALLOWED_PUBLIC_ROLES.includes(req.body.role) ? req.body.role : "user",
     });
 
     return res.status(201).json({

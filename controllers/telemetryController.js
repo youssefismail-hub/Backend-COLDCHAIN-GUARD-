@@ -6,7 +6,7 @@ exports.createTelemetry = async (req, res) => {
   try {
     const { truck, temperature, door_open } = req.body;
 
-    const existingTruck = await Truck.findById({truck: {$in: companyTrucksIds}});
+    const existingTruck = await Truck.findById(truck);
 
     if (!existingTruck) {
       return res.status(404).json({
@@ -19,41 +19,8 @@ exports.createTelemetry = async (req, res) => {
     //  Mise à jour lastSeen
     existingTruck.lastSeen = Date.now();
 
-    //  Vérification température haute
-    if (temperature > existingTruck.max_temperature) {
-      await Alert.create({
-        truck,
-        type: "TEMP_HIGH",
-        severity: "CRITICAL",
-        message: "Temperature exceeds maximum limit !!!",
-      });
-
-      existingTruck.status = "CRITICAL";
-    }
-
-    //  Vérification température basse
-    if (temperature < existingTruck.min_temperature) {
-      await Alert.create({
-        truck,
-        type: "TEMP_LOW",
-        severity: "CRITICAL",
-        message: "Temperature below minimum limit !!!",
-      });
-
-      existingTruck.status = "CRITICAL";
-    }
-
-    //  Vérification porte ouverte
-    if (door_open === true) {
-      await Alert.create({
-        truck,
-        type: "DOOR_OPEN",
-        severity: "WARNING",
-        message: "Truck door is open !!!",
-      });
-
-      existingTruck.status = "WARNING";
-    }
+    //  Vérification des alertes télémétriques
+    await existingTruck.processTelemetryAlerts(temperature, door_open);
 
     await existingTruck.save();
 
@@ -74,6 +41,14 @@ exports.getTelemetryByTruck = async (req, res) => {
     const page = req.query.page * 1 || 1;
     const limit = req.query.limit * 1 || 10;
     const skip = (page - 1) * limit;
+
+    // Verify truck belongs to user's company
+    const truck = await Truck.findOne({ _id: req.params.truckId, company: req.user.company });
+    if (!truck) {
+      return res.status(404).json({
+        message: "Truck Not Found or access denied !!!",
+      });
+    }
 
     const telemetry = await Telemetry.find({
       truck: req.params.truckId,

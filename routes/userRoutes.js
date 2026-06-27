@@ -7,7 +7,7 @@ const {
   deleteUserById,
 } = require("../controllers/userController");
 
-const { protectorMW } = require("../middlewares/authGuard");
+const { protectorMW, restrictTo } = require("../middlewares/authGuard");
 
 const router = require("express").Router();
 
@@ -18,7 +18,7 @@ router.post("/api/signIn", signIn);
 // Protected routes
 router
   .route("/api/users")
-  .post(protectorMW, createUser)
+  .post(protectorMW, restrictTo("admin"), createUser)
   .get(protectorMW, getUsers);
 
 router

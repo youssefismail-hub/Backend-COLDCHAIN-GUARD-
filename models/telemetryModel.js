@@ -31,6 +31,8 @@ const telemetrySchema = new mongoose.Schema({
   },
 });
 
+telemetrySchema.index({ truck: 1, timestamp: -1 });
+
 const Telemetry = mongoose.model("Telemetry", telemetrySchema);
 
 module.exports = Telemetry;

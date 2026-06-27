@@ -23,7 +23,7 @@ exports.createUser = async (req, res) => {
 
 exports.getUsers = async (req, res) => {
   try {
-    const users = await User.find().select("-password -__v");
+    const users = await User.find({ company: req.user.company }).select("-password -__v");
 
     return res.status(200).json({
       message: "Users Fetched !!!",
@@ -40,7 +40,7 @@ exports.getUsers = async (req, res) => {
 
 exports.getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select("-password -__v");
+    const user = await User.findOne({ _id: req.params.id, company: req.user.company }).select("-password -__v");
 
     if (!user) {
       return res.status(404).json({
@@ -62,10 +62,14 @@ exports.getUserById = async (req, res) => {
 
 exports.updateUserById = async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    }).select("-password -__v");
+    const user = await User.findOneAndUpdate(
+      { _id: req.params.id, company: req.user.company },
+      req.body,
+      {
+        new: true,
+        runValidators: true,
+      }
+    ).select("-password -__v");
 
     if (!user) {
       return res.status(404).json({
@@ -87,7 +91,7 @@ exports.updateUserById = async (req, res) => {
 
 exports.deleteUserById = async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
+    const user = await User.findOneAndDelete({ _id: req.params.id, company: req.user.company });
 
     if (!user) {
       return res.status(404).json({

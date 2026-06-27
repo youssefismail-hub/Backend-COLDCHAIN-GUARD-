@@ -10,7 +10,7 @@ const router = require("express").Router();
 
 router
   .route("/api/companies")
-  .post(createCompany)
+  .post(protectorMW, createCompany)
   .get(protectorMW, getCompanies);
 
 router
