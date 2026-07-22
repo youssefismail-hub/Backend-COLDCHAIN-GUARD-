@@ -51,6 +51,8 @@ client.on("message", async (topic, message) => {
       temperature,
       status: truck.status,
       door_open,
+      latitude,
+      longitude,
       timestamp: new Date(),
     });
   } catch (error) {
